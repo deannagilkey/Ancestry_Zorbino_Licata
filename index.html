@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rosemary Zorbino — Maternal Ancestry</title>
+<style>
+  :root {
+    --paper: #E7DEC4;
+    --paper-deep: #DCD1AF;
+    --ink: #2E2518;
+    --ink-soft: #5B4F3C;
+    --rule: #B7A87C;
+    --rust: #B6552C;
+    --rust-soft: #E4C3AE;
+    --teal: #3F6B63;
+    --teal-soft: #CBDAD3;
+    --gold: #9C7A2E;
+    --plum: #7A4A63;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #211B12;
+      --paper-deep: #2A2214;
+      --ink: #EFE6D2;
+      --ink-soft: #C8BA9A;
+      --rule: #5C5134;
+      --rust: #E07A4A;
+      --rust-soft: #3F2B20;
+      --teal: #7FB3A8;
+      --teal-soft: #1E322E;
+      --gold: #D4B458;
+      --plum: #C98FAF;
+    }
+  }
+  .wrap {
+    max-width: 100%;
+    padding: 36px 24px 60px;
+  }
+  header {
+    max-width: 880px;
+    margin: 0 auto 8px;
+    text-align: center;
+  }
+  .kicker {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .legend {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin: 22px auto 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .swatch {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .chart-scroll {
+    overflow-x: auto;
+    margin-top: 32px;
+    padding-bottom: 20px;
+  }
+  #chart {
+    position: relative;
+    margin: 0 auto;
+  }
+  .node {
+    position: absolute;
+    width: 186px;
+    padding: 9px 12px 10px;
+    background: var(--paper-deep);
+    border-left: 3px solid var(--ink-soft);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+    transform: translateY(-50%);
+  }
+  .node.branch-rust { border-left-color: var(--rust); }
+  .node.branch-teal { border-left-color: var(--teal); }
+  .node.root { border-left-color: var(--gold); border-left-width: 4px; }
+  .node.branch-plum { border-left-color: var(--plum); }
+  .node.spouse { border-left-color: var(--ink-soft); border-left-style: dashed; }
+  .node .name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+  .node .life {
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  svg.lines {
+    position: absolute;
+    top: 0; left: 0;
+    overflow: visible;
+  }
+  .lines path {
+    fill: none;
+    stroke-width: 1.4;
+    opacity: 0.6;
+  }
+  footer {
+    max-width: 640px;
+    margin: 40px auto 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">THE ZORBINO-LICATA LINE</div>
+    <p class="sub">Six generations tracing back to 1742, split between the Zorbino / Bernabei line of
+    Abruzzo &amp; Marche, and the Licata / Rizzo / Bonafede line of Agrigento &amp; Palermo, Sicily.</p>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--teal)"></span>Zorbino / Bernabei (Abruzzo-Marche)</span>
+      <span><span class="swatch" style="background:var(--rust)"></span>Licata / Rizzo / Bonafede (Sicily)</span>
+    </div>
+  </header>
+  <div class="chart-scroll">
+    <div id="chart"></div>
+  </div>
+  <footer>Dates and places as recorded in the Ancestry.com family tree export. Some entries have incomplete<br>or approximate dates (marked "Abt." or "ABT" in the source) and are shown as given.</footer>
+</div>
+
+<script>
+const DATA = {"1": {"a": 1, "name": "Rosemary Zorbino", "sex": "F", "birthDate": "12/22/50", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "2": {"a": 2, "name": "Alfio Zorbino", "sex": "M", "birthDate": "20 May 1909", "birthPlace": "civitella del tronto, Italy,", "deathDate": "20 Nov 1970", "deathPlace": "Wheeling, Ohio County, West Virginia, United States of America"}, "4": {"a": 4, "name": "Francesco Frank Zorbini", "sex": "M", "birthDate": "27 September 1888", "birthPlace": "Marche, Italy", "deathDate": "13 Sep 1973", "deathPlace": "Trinity East Medical Center"}, "8": {"a": 8, "name": "Vincenzo Zorbini", "sex": "M", "birthDate": "", "birthPlace": "Italy", "deathDate": "", "deathPlace": "Cerqueto, Provincia di Perugia, Umbria, Italy"}, "9": {"a": 9, "name": "Rosa Mariani", "sex": "F", "birthDate": "", "birthPlace": "Italy", "deathDate": "", "deathPlace": "Italy"}, "5": {"a": 5, "name": "Solidea Bernabei", "sex": "F", "birthDate": "1884", "birthPlace": "Civitella del Tronto, Teramo, Abruzzo, Italy", "deathDate": "16 Oct 1918", "deathPlace": "Civitella del Tronto, Teramo, Abruzzo, Italy"}, "10": {"a": 10, "name": "Vincenzo Barnabei", "sex": "M", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "11": {"a": 11, "name": "Flora Constantini ", "sex": "F", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "3": {"a": 3, "name": "Carmela Mary Josephine Licata", "sex": "F", "birthDate": "16 June 1911", "birthPlace": "Campofelice, Italy", "deathDate": "10 September 2002", "deathPlace": "Weirton, Brooke County, West Virginia, United States of America"}, "6": {"a": 6, "name": "Antonio Licata", "sex": "M", "birthDate": "1875", "birthPlace": "Italy", "deathDate": "27 Oct 1934", "deathPlace": "Hollidays Cove, Brooke Co., West Virginia"}, "12": {"a": 12, "name": "Calogero Maria Licata", "sex": "M", "birthDate": "08 Dec 1834", "birthPlace": "Grotte, Agrigento, Italy", "deathDate": "", "deathPlace": "Grotte, Agrigento, Sicily, Italy"}, "24": {"a": 24, "name": "Antonino Licata", "sex": "M", "birthDate": "ABT 1795", "birthPlace": "Sciacca", "deathDate": "19 Apr 1851", "deathPlace": "Sciacca, Sciacca, Girgenti"}, "48": {"a": 48, "name": "Giuseppe Licata", "sex": "M", "birthDate": "1770", "birthPlace": "Italy", "deathDate": "", "deathPlace": "Italy"}, "96": {"a": 96, "name": "gioacchino Licata", "sex": "M", "birthDate": "1742", "birthPlace": "", "deathDate": "5 Mar 1802", "deathPlace": "Ribera, Agrigento, Sicilia, Italy"}, "97": {"a": 97, "name": "Antonia trunacale", "sex": "F", "birthDate": "", "birthPlace": "", "deathDate": "1801", "deathPlace": ""}, "49": {"a": 49, "name": "Anna Maria Vinci", "sex": "F", "birthDate": "20 FEB 1762", "birthPlace": "Ronta", "deathDate": "12 APR 1832", "deathPlace": "Ronta"}, "25": {"a": 25, "name": "Prudenzia Saldi", "sex": "F", "birthDate": "1804", "birthPlace": "Grotte, Agrigento, Sicily, Italy", "deathDate": "", "deathPlace": "Grotte, Agrigento, Sicily, Italy"}, "13": {"a": 13, "name": "Carmela Rizzo", "sex": "F", "birthDate": "03 Nov 1845", "birthPlace": "Grotte Italy, Agrigento, Sicilia, Italy", "deathDate": "", "deathPlace": ""}, "26": {"a": 26, "name": "Francesco Paolo Rizzo", "sex": "M", "birthDate": "1807", "birthPlace": "Grotte, Girgenti, Girgenti", "deathDate": "BEF 16 Jan 1876", "deathPlace": ""}, "52": {"a": 52, "name": "Salvadore Rizzo", "sex": "M", "birthDate": "1777", "birthPlace": "Grotte", "deathDate": "08 Apr 1837", "deathPlace": "Grotte, Girgenti, Girgenti"}, "104": {"a": 104, "name": "Calogero * Rizzo", "sex": "M", "birthDate": "Abt. 1749", "birthPlace": "Grotte, Girgenti, Kingdom of Two Sicilies", "deathDate": "8 Aug 1839", "deathPlace": "Girgenti, Agrigento, Sicilia, Italy"}, "105": {"a": 105, "name": "Rosa Carchillo", "sex": "F", "birthDate": "1751", "birthPlace": "Grotte", "deathDate": "14 Jul 1821", "deathPlace": "Grotte, Girgenti, Girgenti"}, "53": {"a": 53, "name": "Maria DiFede", "sex": "F", "birthDate": "1787", "birthPlace": "Mazzarino, Caltanissetta, Sicilia, Italy", "deathDate": "13 Jul 1858", "deathPlace": "Grotte, Agrigento, Italy"}, "106": {"a": 106, "name": "Giuseppe di Fede", "sex": "M", "birthDate": "about 1760", "birthPlace": "Grotte, Agrigento, Sicily, Italy", "deathDate": "", "deathPlace": ""}, "107": {"a": 107, "name": "Rosalia Sanfratello", "sex": "F", "birthDate": "about 1770", "birthPlace": "Grotte, Agrigento, Sicily, Italy", "deathDate": "", "deathPlace": ""}, "27": {"a": 27, "name": "Venera Infantino", "sex": "F", "birthDate": "14 Nov 1816", "birthPlace": "Grotte, Girgenti, Girgenti", "deathDate": "", "deathPlace": ""}, "54": {"a": 54, "name": "Diego Infantino", "sex": "M", "birthDate": "1775", "birthPlace": "Grotte", "deathDate": "7 Jan 1845", "deathPlace": "Grotte, Agrigento, Sicily, Italy"}, "108": {"a": 108, "name": "Domenico Infantino", "sex": "M", "birthDate": "", "birthPlace": "Grotte, Agrigento, Sicily, Italy", "deathDate": "", "deathPlace": "Grotte, Agrigento, Sicily, Italy"}, "109": {"a": 109, "name": "Gaetana Fantauzzo", "sex": "F", "birthDate": "Abt. 1752", "birthPlace": "Grotte, Agrigento, Sicily, Italy", "deathDate": "19 Apr 1824", "deathPlace": "Grotte, Agrigento, Sicily, Italy"}, "55": {"a": 55, "name": "Giovanna Napoli", "sex": "F", "birthDate": "March 1790", "birthPlace": "Senglea Malta", "deathDate": "", "deathPlace": "Grotte, Agrigento, Sicilia, Italy"}, "111": {"a": 111, "name": "Stefana Licata", "sex": "F", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "7": {"a": 7, "name": "Giuseppa Bonefede", "sex": "F", "birthDate": "April 7, 1881", "birthPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy", "deathDate": "1932", "deathPlace": ""}, "14": {"a": 14, "name": "Salvatore Bonafede", "sex": "M", "birthDate": "9 November 1842", "birthPlace": "Campofelcie di Roccella, Palermo, Sicilia, Italy", "deathDate": "", "deathPlace": ""}, "28": {"a": 28, "name": "Natale Bonafede", "sex": "M", "birthDate": "1803", "birthPlace": "Gratteri, Palermo, Sicilia, Italy", "deathDate": "7 Sep 1850", "deathPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy"}, "56": {"a": 56, "name": "Rosario Bonafede", "sex": "M", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "57": {"a": 57, "name": "Giuseppa ", "sex": "F", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "29": {"a": 29, "name": "Carmela di Ganci", "sex": "F", "birthDate": "1801", "birthPlace": "Collesano, Palermo, Sicilia, Italy", "deathDate": "16 Feb 1851", "deathPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy"}, "58": {"a": 58, "name": "Antonino Di Ganci", "sex": "M", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "59": {"a": 59, "name": "Anna Ippolito", "sex": "F", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": ""}, "15": {"a": 15, "name": "Rosalia Rosa Corteve", "sex": "F", "birthDate": "", "birthPlace": "Italy", "deathDate": "", "deathPlace": ""}};
+
+// Sibling groups: each pivot (an ahnentafel person already in DATA) gets siblings
+// stacked in the same column, ordered by birth year, anchored to the pivot's position.
+const SIBLING_GROUPS = [
+  {
+    "pivotA": 1,
+    "parents": [
+      2,
+      3
+    ],
+    "members": [
+      {
+        "name": "Frank Alfio Zorbino",
+        "birthDate": "21 Apr 1939",
+        "birthPlace": "Weirton, West Virginia",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -4
+      },
+      {
+        "name": "Joseph Zorbino",
+        "birthDate": "17 July 1940",
+        "birthPlace": "",
+        "deathDate": "7 February 1941",
+        "deathPlace": "",
+        "offset": -3
+      },
+      {
+        "name": "Solidea Zorbino",
+        "birthDate": "abt 1944",
+        "birthPlace": "",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -2
+      },
+      {
+        "name": "Josephine Roselia Zorbino",
+        "birthDate": "abt 1946",
+        "birthPlace": "Ohio",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -1
+      }
+    ]
+  },
+  {
+    "pivotA": 3,
+    "parents": [
+      6,
+      7
+    ],
+    "members": [
+      {
+        "name": "Charles Joseph Licata",
+        "birthDate": "january 1, 1910",
+        "birthPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy",
+        "deathDate": "25 April 1978",
+        "deathPlace": "",
+        "offset": -1
+      },
+      {
+        "name": "Samuel Antonio Licata",
+        "birthDate": "7 March 1915",
+        "birthPlace": "Pennsylvania, United States of America",
+        "deathDate": "8 November 1981",
+        "deathPlace": "",
+        "offset": 1
+      },
+      {
+        "name": "Rosalia Licata",
+        "birthDate": "12 January 1917",
+        "birthPlace": "Pennsylvania, United States of America",
+        "deathDate": "2 June 1920",
+        "deathPlace": "Pittsburgh, Allegheny County, Pennsylvania, United States of America",
+        "offset": 2
+      },
+      {
+        "name": "Guiseppe Licata",
+        "birthDate": "28 Dec 1918",
+        "birthPlace": "Pennsylvania",
+        "deathDate": "9 February 1919",
+        "deathPlace": "Pittsburgh, Allegheny County, Pennsylvania, United States of America",
+        "offset": 3
+      }
+    ]
+  },
+  {
+    "pivotA": 4,
+    "parents": [
+      8,
+      9
+    ],
+    "members": [
+      {
+        "name": "Luigi Zorbini",
+        "birthDate": "1881",
+        "birthPlace": "Civitella Teromo, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -1
+      },
+      {
+        "name": "Franchina Zorbini",
+        "birthDate": "",
+        "birthPlace": "Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 1
+      }
+    ]
+  },
+  {
+    "pivotA": 6,
+    "parents": [
+      12,
+      13
+    ],
+    "members": [
+      {
+        "name": "Providenza Licata",
+        "birthDate": "15 Mar 1864",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -1
+      },
+      {
+        "name": "Mary Pata",
+        "birthDate": "22 Jun 1884",
+        "birthPlace": "Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 1
+      },
+      {
+        "name": "Mary Ann Licata",
+        "birthDate": "22 Jun 1884",
+        "birthPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy",
+        "deathDate": "20 April 1953",
+        "deathPlace": "Rochester, New York, USA",
+        "offset": 2
+      },
+      {
+        "name": "Alphonse Licata",
+        "birthDate": "18 October 1889",
+        "birthPlace": "Italy",
+        "deathDate": "6 January 1952",
+        "deathPlace": "",
+        "offset": 3
+      },
+      {
+        "name": "Antonina Licata",
+        "birthDate": "abt 1890",
+        "birthPlace": "",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 4
+      }
+    ]
+  },
+  {
+    "pivotA": 7,
+    "parents": [
+      14,
+      15
+    ],
+    "members": [
+      {
+        "name": "Natale Bonafede",
+        "birthDate": "4 Sep 1874",
+        "birthPlace": "Italy",
+        "deathDate": "11 Dec 1919",
+        "deathPlace": "Pittsburgh, Allegheny, Pennsylvania, USA",
+        "offset": -1
+      }
+    ]
+  },
+  {
+    "pivotA": 12,
+    "parents": [
+      24,
+      25
+    ],
+    "members": [
+      {
+        "name": "Filippo Licata",
+        "birthDate": "Abt. 1817",
+        "birthPlace": "Sambuca, Agrigento, Sicily, Italy",
+        "deathDate": "1880",
+        "deathPlace": "Sambuca Zabut De Sicilia, Agrigento, Italy",
+        "offset": -3
+      },
+      {
+        "name": "Giuseppa Licata",
+        "birthDate": "17 Jan 1830",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "31 Oct 1831",
+        "deathPlace": "Grotte, Agrigento, Sicily, Italy",
+        "offset": -2
+      },
+      {
+        "name": "Alfonsa Licata",
+        "birthDate": "15 Nov 1831",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "1 Nov 1846",
+        "deathPlace": "Grotte, Agrigento, Sicily, Italy",
+        "offset": -1
+      },
+      {
+        "name": "Guiseppe Licata",
+        "birthDate": "05 May 1837",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "",
+        "deathPlace": "Grotte, Agrigento, Sicily, Italy",
+        "offset": 1
+      }
+    ]
+  },
+  {
+    "pivotA": 13,
+    "parents": [
+      26,
+      27
+    ],
+    "members": [
+      {
+        "name": "Domenica Rizzo",
+        "birthDate": "12 Aug 1838",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "",
+        "deathPlace": "Sicily, Italy",
+        "offset": -3
+      },
+      {
+        "name": "Giovanna Rizzo",
+        "birthDate": "1840",
+        "birthPlace": "Grotte",
+        "deathDate": "10 Sep 1841",
+        "deathPlace": "Grotte, Girgenti, Girgenti",
+        "offset": -2
+      },
+      {
+        "name": "Salvadore Rizzo",
+        "birthDate": "1 May 1843",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italia",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -1
+      },
+      {
+        "name": "Alfonso Maria Rizzo",
+        "birthDate": "1 Dec 1848",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italia",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 1
+      },
+      {
+        "name": "Diego Maria Rizzo",
+        "birthDate": "9 Aug 1851",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italia",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 2
+      },
+      {
+        "name": "Rosario Mario Rizzo",
+        "birthDate": "21 Aug 1854",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 3
+      },
+      {
+        "name": "Giovanni Rizzo",
+        "birthDate": "12 Jan 1858",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italia",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 4
+      }
+    ]
+  },
+  {
+    "pivotA": 14,
+    "parents": [
+      28,
+      29
+    ],
+    "members": [
+      {
+        "name": "Maria Rosaria Bonafede",
+        "birthDate": "1825",
+        "birthPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": -2
+      },
+      {
+        "name": "Gaetano Bonafede",
+        "birthDate": "1829",
+        "birthPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy",
+        "deathDate": "7 May 1855",
+        "deathPlace": "Campofelice di Roccella, Palermo, Sicilia, Italy",
+        "offset": -1
+      }
+    ]
+  },
+  {
+    "pivotA": 24,
+    "parents": [
+      48,
+      49
+    ],
+    "members": [
+      {
+        "name": "Antonino Licata",
+        "birthDate": "1799",
+        "birthPlace": "Sciacca",
+        "deathDate": "19 Apr 1851",
+        "deathPlace": "Sciacca, Sciacca, Girgenti",
+        "offset": 1
+      },
+      {
+        "name": "Vincenzo Licata",
+        "birthDate": "1805",
+        "birthPlace": "Sciacca",
+        "deathDate": "09 Oct 1851",
+        "deathPlace": "Sciacca, Sciacca, Girgenti",
+        "offset": 2
+      }
+    ]
+  },
+  {
+    "pivotA": 26,
+    "parents": [
+      52,
+      53
+    ],
+    "members": [
+      {
+        "name": "Calogero Rizzo",
+        "birthDate": "1805",
+        "birthPlace": "Grazzarino, Caltanissetta, Caltanissetta",
+        "deathDate": "25 Feb 1882",
+        "deathPlace": "Grotte, Agrigento, Sicilia, Italy",
+        "offset": -1
+      },
+      {
+        "name": "Giovanni Rizzo",
+        "birthDate": "1810",
+        "birthPlace": "Mazzarino, Terranova, Caltanisetta",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 1
+      },
+      {
+        "name": "Rosario Rizzo",
+        "birthDate": "1817",
+        "birthPlace": "Grotte, Girgenti, Girgenti",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 2
+      },
+      {
+        "name": "Rosario Rizzo",
+        "birthDate": "1817",
+        "birthPlace": "Grotte, Girgenti, Girgenti",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 3
+      },
+      {
+        "name": "Giuseppa Francesca Rizzo",
+        "birthDate": "30 Dec 1820",
+        "birthPlace": "Grotte Italy, Agrigento, Sicilia, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 4
+      },
+      {
+        "name": "Alfonso E Calogero * Rizzo",
+        "birthDate": "23 Jul 1825",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 5
+      },
+      {
+        "name": "Alfonso E Calogero * Rizzo",
+        "birthDate": "23 Jul 1825",
+        "birthPlace": "Grotte, Agrigento, Italy",
+        "deathDate": "",
+        "deathPlace": "",
+        "offset": 6
+      }
+    ]
+  },
+  {
+    "pivotA": 27,
+    "parents": [
+      54,
+      55
+    ],
+    "members": [
+      {
+        "name": "Giuseppe Infantino",
+        "birthDate": "1815",
+        "birthPlace": "Grotte, Agrigento, Sicilia, Italy",
+        "deathDate": "",
+        "deathPlace": "Grotte, Agrigento, Sicily, Italy",
+        "offset": -1
+      },
+      {
+        "name": "Rosalia Infantino",
+        "birthDate": "Abt. 1821",
+        "birthPlace": "Grotte, Agrigento, Sicily, Italy",
+        "deathDate": "",
+        "deathPlace": "Grotte, Agrigento, Sicily, Italy",
+        "offset": 1
+      }
+    ]
+  },
+  {
+    "pivotA": 96,
+    "parents": [
+      192,
+      193
+    ],
+    "members": [
+      {
+        "name": "Gioacchino Licata",
+        "birthDate": "abt 1742",
+        "birthPlace": "",
+        "deathDate": "5 Mar 1802",
+        "deathPlace": "Ribera, Agrigento, Sicilia, Italy",
+        "offset": 1
+      },
+      {
+        "name": "Elisabetta Licata",
+        "birthDate": "",
+        "birthPlace": "",
+        "deathDate": "aft 1773",
+        "deathPlace": "",
+        "offset": 2
+      },
+      {
+        "name": "Anna Licata",
+        "birthDate": "",
+        "birthPlace": "",
+        "deathDate": "1786-1848",
+        "deathPlace": "",
+        "offset": 3
+      }
+    ]
+  },
+  {
+    "pivotA": 104,
+    "parents": [
+      208,
+      209
+    ],
+    "members": [
+      {
+        "name": "Carmela Rizzo",
+        "birthDate": "1764",
+        "birthPlace": "Girgenti, Agrigento, Sicilia, Italy",
+        "deathDate": "20 Feb 1844",
+        "deathPlace": "Girgenti, Agrigento, Sicilia, Italy",
+        "offset": 1
+      },
+      {
+        "name": "Giuseppe Rizzo",
+        "birthDate": "1764",
+        "birthPlace": "Girgenti, Agrigenti, Sicilia, Italy",
+        "deathDate": "14 Jun 1837",
+        "deathPlace": "Girgenti, Agrigenti, Sicilia, Italy",
+        "offset": 2
+      },
+      {
+        "name": "Bartolomeus Rizzo",
+        "birthDate": "1769",
+        "birthPlace": "",
+        "deathDate": "19 Feb 1818",
+        "deathPlace": "Aragona, Agrigento, Sicilia, Italy",
+        "offset": 3
+      }
+    ]
+  }
+];
+
+const colWidth = 230;
+const rowUnit = 150;
+const nodeW = 186;
+const siblingGap = 120;
+
+// Reserve extra vertical room for any node whose sibling cluster would otherwise
+// spill into a neighboring branch's space.
+const spanUnitsMap = {};
+SIBLING_GROUPS.forEach(g => {
+  // The pivot is always centered in its reserved band, so the band must be wide
+  // enough to cover the larger of the two offset extremes on EITHER side of it,
+  // not just the raw span (which undercounts lopsided groups like offsets 0..6).
+  const offsets = g.members.map(m => m.offset).concat([0]);
+  const halfSpanPx = Math.max(...offsets.map(o => Math.abs(o))) * siblingGap;
+  spanUnitsMap[g.pivotA] = Math.ceil((2 * halfSpanPx) / rowUnit) + 1;
+});
+
+function unitHeight(a, memo) {
+  if (memo.has(a)) return memo.get(a);
+  const node = DATA[a];
+  if (!node) { memo.set(a, 0); return 0; }
+  const fh = unitHeight(2*a, memo);
+  const mh = unitHeight(2*a+1, memo);
+  let h = (fh + mh) || 1;
+  if (spanUnitsMap[a]) h = Math.max(h, spanUnitsMap[a]);
+  memo.set(a, h);
+  return h;
+}
+
+function generation(a) { return Math.floor(Math.log2(a)); }
+
+function branchColor(a) {
+  if (a === 1) return 'root';
+  let r = a;
+  while (r > 3) r = Math.floor(r / 2);
+  return r === 2 ? 'branch-teal' : 'branch-rust';
+}
+
+const memo = new Map();
+const totalUnits = unitHeight(1, memo);
+let maxGen = 0;
+Object.keys(DATA).forEach(k => { maxGen = Math.max(maxGen, generation(Number(k))); });
+
+const positions = {};
+function place(a, top, height) {
+  const node = DATA[a];
+  if (!node) return;
+  const gen = generation(a);
+  const y = (top + height/2) * rowUnit;
+  const x = (maxGen - gen) * colWidth;
+  positions[a] = { x, y, gen };
+  const fh = unitHeight(2*a, memo);
+  const mh = unitHeight(2*a+1, memo);
+  if (fh > 0) place(2*a, top, fh);
+  if (mh > 0) place(2*a+1, top + fh, mh);
+}
+place(1, 0, totalUnits);
+
+// Compute sibling positions for every group, anchored to each pivot's (unshifted) y
+SIBLING_GROUPS.forEach(group => {
+  const pivotPos = positions[group.pivotA];
+  if (!pivotPos) { group.positions = []; return; }
+  group.positions = group.members.map(m => (
+    { x: pivotPos.x, y: pivotPos.y + m.offset * siblingGap }
+  ));
+});
+
+const chartEl = document.getElementById('chart');
+const baseHeight = totalUnits * rowUnit + 20;
+const allExtraY = SIBLING_GROUPS.flatMap(g => g.positions.map(p => p.y));
+const minY = Math.min(0, ...allExtraY);
+const maxY = Math.max(baseHeight - 20, ...allExtraY);
+const yShift = Math.max(0, -minY + 40);
+const totalHeight = maxY + yShift + 40;
+const totalWidth = (maxGen + 1) * colWidth + nodeW;
+chartEl.style.width = totalWidth + 'px';
+chartEl.style.height = totalHeight + 'px';
+if (yShift > 0) {
+  Object.values(positions).forEach(p => { p.y += yShift; });
+  SIBLING_GROUPS.forEach(g => g.positions.forEach(p => { p.y += yShift; }));
+}
+
+// SVG for connecting lines
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(svgNS, "svg");
+svg.setAttribute("class", "lines");
+svg.setAttribute("width", totalWidth);
+svg.setAttribute("height", totalHeight);
+chartEl.appendChild(svg);
+
+function colorFor(a) {
+  const cls = branchColor(a);
+  return cls === 'branch-teal' ? 'var(--teal)' : cls === 'branch-rust' ? 'var(--rust)' : 'var(--gold)';
+}
+function drawLine(x1, y1, x2, y2, color, dashed) {
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+  path.setAttribute("stroke", color);
+  if (dashed) path.setAttribute("stroke-dasharray", "3,3");
+  svg.appendChild(path);
+}
+
+// Direct lineage: a smooth curve from each node to its own parent pair,
+// EXCEPT where that node has a sibling group — those get a bracket instead (below).
+const combPivots = new Set(SIBLING_GROUPS.map(g => g.pivotA));
+Object.keys(positions).forEach(aStr => {
+  const a = Number(aStr);
+  const pos = positions[a];
+  [2*a, 2*a+1].forEach(childA => {
+    if (positions[childA]) {
+      if (combPivots.has(a)) return; // handled by the bracket below
+      const cpos = positions[childA];
+      const x1 = cpos.x, y1 = cpos.y;
+      const x2 = pos.x + nodeW, y2 = pos.y;
+      const midX = (x1 + x2) / 2;
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+      const color = branchColor(a) === 'branch-teal' ? 'var(--teal)' :
+                    branchColor(a) === 'branch-rust' ? 'var(--rust)' : 'var(--gold)';
+      path.setAttribute("stroke", color);
+      svg.appendChild(path);
+    }
+  });
+});
+
+// Sibling brackets: one marriage tie + one spine + short ticks to every
+// child in the family (pivot included), instead of a separate curve per person.
+SIBLING_GROUPS.forEach(group => {
+  const pivotPos = positions[group.pivotA];
+  if (!pivotPos) return;
+  const [fatherA, motherA] = group.parents;
+  const fatherPos = positions[fatherA];
+  const motherPos = positions[motherA];
+  const allMembers = [{ x: pivotPos.x, y: pivotPos.y }, ...group.positions];
+  const ys = allMembers.map(m => m.y);
+  const spineTop = Math.min(...ys), spineBottom = Math.max(...ys);
+
+  if (!fatherPos && !motherPos) return; // nothing to connect to further back
+
+  const anchor = fatherPos || motherPos;
+  const parentEdgeX = anchor.x + nodeW;
+  const spineX = parentEdgeX + (pivotPos.x - parentEdgeX) * 0.45;
+  const lineColor = fatherA && motherA && fatherPos && motherPos ? 'var(--ink-soft)' : colorFor(fatherPos ? fatherA : motherA);
+
+  if (fatherPos && motherPos) {
+    const tieX = parentEdgeX + 14;
+    drawLine(tieX, fatherPos.y, tieX, motherPos.y, 'var(--ink-soft)', true);
+    const tieMidY = (fatherPos.y + motherPos.y) / 2;
+    drawLine(tieX, tieMidY, spineX, tieMidY, 'var(--ink-soft)');
+  } else {
+    drawLine(parentEdgeX, anchor.y, spineX, anchor.y, lineColor);
+  }
+  drawLine(spineX, spineTop, spineX, spineBottom, 'var(--ink-soft)');
+  allMembers.forEach(m => drawLine(spineX, m.y, m.x, m.y, 'var(--ink-soft)'));
+});
+
+function lifeHtml(node) {
+  let life = '';
+  if (node.birthDate || node.birthPlace) {
+    life += 'b. ' + [node.birthDate, node.birthPlace].filter(Boolean).join(', ');
+  }
+  if (node.deathDate || node.deathPlace) {
+    if (life) life += '<br>';
+    life += 'd. ' + [node.deathDate, node.deathPlace].filter(Boolean).join(', ');
+  }
+  return life;
+}
+function renderExtra(pos, node, cls) {
+  const div = document.createElement('div');
+  div.className = 'node ' + cls;
+  div.style.left = pos.x + 'px';
+  div.style.top = pos.y + 'px';
+  div.innerHTML = `<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>`;
+  chartEl.appendChild(div);
+}
+
+SIBLING_GROUPS.forEach(group => {
+  group.members.forEach((m, i) => renderExtra(group.positions[i], m, 'root'));
+});
+
+// Direct ancestor nodes render last so they always sit on top of any overlapping sibling box
+Object.keys(positions).forEach(aStr => {
+  const a = Number(aStr);
+  const node = DATA[a];
+  const pos = positions[a];
+  const div = document.createElement('div');
+  div.className = 'node ' + branchColor(a);
+  div.style.left = pos.x + 'px';
+  div.style.top = pos.y + 'px';
+  div.innerHTML = `<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>`;
+  chartEl.appendChild(div);
+});
+</script>
+</body>
+</html>
