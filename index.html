@@ -110,6 +110,25 @@
   .node.root { border-left-color: var(--gold); border-left-width: 4px; }
   .node.branch-plum { border-left-color: var(--plum); }
   .node.spouse { border-left-color: var(--ink-soft); border-left-style: dashed; }
+  .node .thumb {
+    float: left;
+    width: 38px; height: 38px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin: 0 8px 4px 0;
+    border: 1px solid var(--rule);
+  }
+  .node .docs {
+    clear: both;
+    margin-top: 4px;
+  }
+  .node .docs a {
+    display: block;
+    font-size: 10px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    line-height: 1.6;
+  }
   .node .name {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 14.5px;
@@ -318,6 +337,15 @@ const SIBLING_GROUPS = [
         "deathDate": "",
         "deathPlace": "",
         "offset": 4
+      },
+      {
+        "name": "Philip M. Licata",
+        "birthDate": "",
+        "birthPlace": "",
+        "deathDate": "",
+        "deathPlace": "Tampa, Florida (aged 35)",
+        "offset": 5,
+        "note": "Added from family photos/documents, not the Ancestry GEDCOM. Exact birth order is a guess pending a firmer date."
       }
     ]
   },
@@ -808,6 +836,109 @@ SIBLING_GROUPS.forEach(group => {
   allMembers.forEach(m => drawLine(spineX, m.y, m.x, m.y, 'var(--ink-soft)'));
 });
 
+// Photos and supporting documents for people in the tree, keyed by ahnentafel number
+const MEDIA = {
+  2: { // Alfio Zorbino
+    photo: "images/licata/alfio-zorbino-older.jpg",
+    docs: [
+      { label: "Baptism record (1909)", path: "docs/vital-records/alfio-zorbino-baptism-1909.jpg" },
+      { label: "Immigration card (1930)", path: "docs/vital-records/alfio-zorbino-immigration-card-1930.jpg" },
+      { label: "In military uniform", path: "images/licata/alfio-zorbino-military.jpg" },
+      { label: "Marriage certificate (to Carmela Licata, 1938)", path: "docs/vital-records/alfio-carmela-marriage-certificate-1938.jpg" }
+    ]
+  },
+  3: { // Carmela Mary Josephine Licata
+    photo: "images/licata/carmela-licata-zorbino.jpg",
+    docs: [
+      { label: "Additional portrait", path: "images/licata/carmela-licata-zorbino-2.jpg" },
+      { label: "Marriage certificate (to Alfio Zorbino, 1938)", path: "docs/vital-records/alfio-carmela-marriage-certificate-1938.jpg" },
+      { label: "Gravestone", path: "docs/vital-records/carmela-licata-zorbino-gravestone.jpg" }
+    ]
+  },
+  7: { // Giuseppa Bonefede
+    docs: [
+      { label: "Birth record (1881)", path: "docs/vital-records/giuseppa-bonafede-birth-record-1881.jpg" },
+      { label: "Gravestone (as \"Giuseppina Licata\")", path: "docs/vital-records/giuseppa-bonafede-gravestone.jpg" },
+      { label: "Passenger list (immigration)", path: "docs/vital-records/giuseppa-bonafede-passenger-list.jpg" }
+    ]
+  },
+  6: { // Antonio Licata
+    photo: "images/licata/antonio-licata.jpg",
+    docs: [
+      { label: "Declaration of Intention (1923)", path: "docs/vital-records/antonio-licata-declaration-of-intention-1923.jpg" },
+      { label: "Death certificate (1934)", path: "docs/vital-records/antonio-licata-death-certificate-1934.jpg" },
+      { label: "Gravestone", path: "docs/vital-records/antonio-licata-gravestone.jpg" }
+    ]
+  },
+  12: { // Calogero Maria Licata
+    docs: [
+      { label: "Baptism record (1834)", path: "docs/vital-records/calogero-licata-baptism-1834.jpg" }
+    ]
+  },
+  26: { // Francesco Paolo Rizzo
+    docs: [
+      { label: "Marriage record (1837)", path: "docs/vital-records/infantino-rizzo-marriage-1837.jpg" }
+    ]
+  },
+  27: { // Venera Infantino
+    docs: [
+      { label: "Marriage record (1837)", path: "docs/vital-records/infantino-rizzo-marriage-1837.jpg" }
+    ]
+  }
+};
+
+// Media for people who only appear in a sibling group (no ahnentafel number of their own),
+// keyed by their exact name as written in SIBLING_GROUPS.
+const SIBLING_MEDIA = {
+  "Luigi Zorbini": {
+    docs: [
+      { label: "Wife America's passenger list (1928)", path: "docs/vital-records/luigi-zorbini-wife-america-passenger-list-1928.jpg" }
+    ]
+  },
+  "Joseph Zorbino": {
+    photo: "images/zorbino/joseph-zorbino.jpg",
+    docs: [
+      { label: "Second photo", path: "images/zorbino/joseph-zorbino-2.jpg" }
+    ]
+  },
+  "Natale Bonafede": {
+    docs: [
+      { label: "Death certificate (1919)", path: "docs/vital-records/natale-bonafede-death-certificate-1919.jpg" },
+      { label: "Grave location map (Calvary Cemetery, Pittsburgh)", path: "docs/vital-records/natale-bonafede-grave-map.pdf" }
+    ]
+  },
+  "Guiseppe Licata": {
+    docs: [{ label: "Gravestone (with Rosalia)", path: "docs/vital-records/guiseppe-rosalia-licata-gravestone.jpg" }]
+  },
+  "Rosalia Licata": {
+    docs: [{ label: "Gravestone (with Guiseppe)", path: "docs/vital-records/guiseppe-rosalia-licata-gravestone.jpg" }]
+  },
+  "Philip M. Licata": {
+    photo: "images/licata/philip-m-licata-tampa.jpg",
+    docs: [
+      { label: "Second photo", path: "images/licata/philip-m-licata-tampa-2.jpg" },
+      { label: "Marriage license (to Antonina Monte)", path: "docs/vital-records/philip-licata-antonina-monte-marriage-license.jpg" },
+      { label: "Obituary", path: "docs/vital-records/philip-licata-obituary.jpg" },
+      { label: "News: attempted holdup, Tampa", path: "docs/newspaper-clippings/philip-licata-attempted-holdup-tampa.jpg" },
+      { label: "News: payroll holdup case", path: "docs/newspaper-clippings/philip-licata-payroll-holdup-case.jpg" },
+      { label: "News: trial concluded", path: "docs/newspaper-clippings/philip-licata-trial-concluded.jpg" },
+      { label: "News: acquittal", path: "docs/newspaper-clippings/philip-licata-acquittal.jpg" },
+      { label: "News: court page", path: "docs/newspaper-clippings/philip-licata-court-page.jpg" },
+      { label: "News: liquor violation charge", path: "docs/newspaper-clippings/philip-licata-liquor-violation.jpg" },
+      { label: "News: petty larceny charge", path: "docs/newspaper-clippings/philip-licata-petty-larceny.jpg" }
+    ]
+  }
+};
+
+function buildMediaHtml(m) {
+  if (!m) return { thumb: "", docs: "" };
+  const thumb = m.photo ? `<img class="thumb" src="${m.photo}" alt="">` : "";
+  const docs = m.docs ? `<div class="docs">${m.docs.map(d => `<a href="${d.path}" target="_blank" rel="noopener">${d.label}</a>`).join("")}</div>` : "";
+  return { thumb, docs };
+}
+function mediaHtml(a) { return buildMediaHtml(MEDIA[a]); }
+function siblingMediaHtml(name) { return buildMediaHtml(SIBLING_MEDIA[name]); }
+
 function lifeHtml(node) {
   let life = '';
   if (node.birthDate || node.birthPlace) {
@@ -824,7 +955,8 @@ function renderExtra(pos, node, cls) {
   div.className = 'node ' + cls;
   div.style.left = pos.x + 'px';
   div.style.top = pos.y + 'px';
-  div.innerHTML = `<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>`;
+  const media = siblingMediaHtml(node.name.trim());
+  div.innerHTML = `${media.thumb}<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>${media.docs}`;
   chartEl.appendChild(div);
 }
 
@@ -841,7 +973,8 @@ Object.keys(positions).forEach(aStr => {
   div.className = 'node ' + branchColor(a);
   div.style.left = pos.x + 'px';
   div.style.top = pos.y + 'px';
-  div.innerHTML = `<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>`;
+  const media = mediaHtml(a);
+  div.innerHTML = `${media.thumb}<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>${media.docs}`;
   chartEl.appendChild(div);
 });
 </script>
