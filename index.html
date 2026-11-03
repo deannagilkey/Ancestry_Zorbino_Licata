@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Rosemary Zorbino — Maternal Ancestry</title>
+<title>The Zorbino-Licata Line</title>
 <style>
   :root {
     --paper: #E7DEC4;
@@ -91,6 +91,36 @@
     margin-top: 32px;
     padding-bottom: 20px;
   }
+  .zoom-controls {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 50;
+    display: flex;
+    gap: 6px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .zoom-controls button {
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .zoom-controls button:hover {
+    background: var(--rust-soft);
+  }
+  .zoom-controls #zoomReset {
+    font-size: 11px;
+  }
   #chart {
     position: relative;
     margin: 0 auto;
@@ -121,6 +151,8 @@
   .node .docs {
     clear: both;
     margin-top: 4px;
+    max-height: 56px;
+    overflow-y: auto;
   }
   .node .docs a {
     display: block;
@@ -128,6 +160,10 @@
     color: var(--ink-soft);
     text-decoration: underline;
     line-height: 1.6;
+  }
+  .node {
+    max-height: 180px;
+    overflow-y: auto;
   }
   .node .name {
     font-family: 'Fraunces', Georgia, serif;
@@ -172,6 +208,11 @@
       <span><span class="swatch" style="background:var(--rust)"></span>Licata / Rizzo / Bonafede (Sicily)</span>
     </div>
   </header>
+  <div class="zoom-controls">
+    <button id="zoomOut" aria-label="Zoom out">−</button>
+    <button id="zoomReset" aria-label="Reset zoom">Reset</button>
+    <button id="zoomIn" aria-label="Zoom in">+</button>
+  </div>
   <div class="chart-scroll">
     <div id="chart"></div>
   </div>
@@ -681,9 +722,9 @@ const SIBLING_GROUPS = [
 ];
 
 const colWidth = 230;
-const rowUnit = 150;
+const rowUnit = 210;
 const nodeW = 186;
-const siblingGap = 120;
+const siblingGap = 195;
 
 // Reserve extra vertical room for any node whose sibling cluster would otherwise
 // spill into a neighboring branch's space.
@@ -977,6 +1018,36 @@ Object.keys(positions).forEach(aStr => {
   div.innerHTML = `${media.thumb}<div class="name">${node.name.trim()}</div><div class="life">${lifeHtml(node)}</div>${media.docs}`;
   chartEl.appendChild(div);
 });
+
+// Zoom controls
+let zoomLevel = 0.6;
+const ZOOM_MIN = 0.3, ZOOM_MAX = 1.5, ZOOM_STEP = 0.1;
+function applyZoom() {
+  chartEl.style.zoom = zoomLevel;
+}
+applyZoom();
+document.getElementById('zoomIn').addEventListener('click', () => {
+  zoomLevel = Math.min(ZOOM_MAX, Math.round((zoomLevel + ZOOM_STEP) * 100) / 100);
+  applyZoom();
+});
+document.getElementById('zoomOut').addEventListener('click', () => {
+  zoomLevel = Math.max(ZOOM_MIN, Math.round((zoomLevel - ZOOM_STEP) * 100) / 100);
+  applyZoom();
+});
+document.getElementById('zoomReset').addEventListener('click', () => {
+  zoomLevel = 0.6;
+  applyZoom();
+});
+// Ctrl/Cmd + scroll wheel to zoom
+document.querySelector('.chart-scroll').addEventListener('wheel', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    zoomLevel = e.deltaY < 0
+      ? Math.min(ZOOM_MAX, Math.round((zoomLevel + ZOOM_STEP) * 100) / 100)
+      : Math.max(ZOOM_MIN, Math.round((zoomLevel - ZOOM_STEP) * 100) / 100);
+    applyZoom();
+  }
+}, { passive: false });
 </script>
 </body>
 </html>
