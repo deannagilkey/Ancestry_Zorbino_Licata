@@ -879,6 +879,11 @@ SIBLING_GROUPS.forEach(group => {
 
 // Photos and supporting documents for people in the tree, keyed by ahnentafel number
 const MEDIA = {
+  5: { // Solidea Bernabei
+    docs: [
+      { label: "Death certificate (1918)", path: "solidea-bernabei-death-certificate-1918.pdf" }
+    ]
+  },
   2: { // Alfio Zorbino
     photo: "alfio-zorbino-older.jpg",
     docs: [
@@ -893,14 +898,17 @@ const MEDIA = {
     docs: [
       { label: "Additional portrait", path: "carmela-licata-zorbino-2.jpg" },
       { label: "Marriage certificate (to Alfio Zorbino, 1938)", path: "alfio-carmela-marriage-certificate-1938.jpg" },
-      { label: "Gravestone", path: "carmela-licata-zorbino-gravestone.jpg" }
+      { label: "Gravestone", path: "carmela-licata-zorbino-gravestone.jpg" },
+      { label: "Family photo (with parents, Charles, Samuel)", path: "antonio-licata-family-group.jpg" }
     ]
   },
   7: { // Giuseppa Bonefede
+    photo: "giuseppa-bonafede-porch.jpg",
     docs: [
       { label: "Birth record (1881)", path: "giuseppa-bonafede-birth-record-1881.jpg" },
       { label: "Gravestone (as \"Giuseppina Licata\")", path: "giuseppa-bonafede-gravestone.jpg" },
-      { label: "Passenger list (immigration)", path: "giuseppa-bonafede-passenger-list.jpg" }
+      { label: "Passenger list (immigration)", path: "giuseppa-bonafede-passenger-list.jpg" },
+      { label: "Family photo (with Antonio, Carmela, Charles, Samuel)", path: "antonio-licata-family-group.jpg" }
     ]
   },
   6: { // Antonio Licata
@@ -908,7 +916,9 @@ const MEDIA = {
     docs: [
       { label: "Declaration of Intention (1923)", path: "antonio-licata-declaration-of-intention-1923.jpg" },
       { label: "Death certificate (1934)", path: "antonio-licata-death-certificate-1934.jpg" },
-      { label: "Gravestone", path: "antonio-licata-gravestone.jpg" }
+      { label: "Gravestone", path: "antonio-licata-gravestone.jpg" },
+      { label: "Family photo (with Giuseppa, Carmela, Charles, Samuel)", path: "antonio-licata-family-group.jpg" },
+      { label: "Death register (Brooke County, WV)", path: "antonio-licata-death-register-brooke-county-1934.jpg" }
     ]
   },
   12: { // Calogero Maria Licata
@@ -931,6 +941,11 @@ const MEDIA = {
 // Media for people who only appear in a sibling group (no ahnentafel number of their own),
 // keyed by their exact name as written in SIBLING_GROUPS.
 const SIBLING_MEDIA = {
+  "Alphonse Licata": {
+    docs: [
+      { label: "Marriage record (to Maria Allessi, 1918)", path: "alphonse-licata-maria-allessi-marriage-1918.jpg" }
+    ]
+  },
   "Luigi Zorbini": {
     docs: [
       { label: "Wife America's passenger list (1928)", path: "luigi-zorbini-wife-america-passenger-list-1928.jpg" }
@@ -949,10 +964,19 @@ const SIBLING_MEDIA = {
     ]
   },
   "Guiseppe Licata": {
-    docs: [{ label: "Gravestone (with Rosalia)", path: "guiseppe-rosalia-licata-gravestone.jpg" }]
+    docs: [
+      { label: "Gravestone (with Rosalia)", path: "guiseppe-rosalia-licata-gravestone.jpg" },
+      { label: "Death certificate (1919, recorded as \"Legota\")", path: "guiseppe-licata-death-certificate-1919.jpg" }
+    ]
   },
   "Rosalia Licata": {
     docs: [{ label: "Gravestone (with Guiseppe)", path: "guiseppe-rosalia-licata-gravestone.jpg" }]
+  },
+  "Charles Joseph Licata": {
+    docs: [{ label: "Family photo (with parents, Carmela, Samuel)", path: "antonio-licata-family-group.jpg" }]
+  },
+  "Samuel Antonio Licata": {
+    docs: [{ label: "Family photo (with parents, Carmela, Charles)", path: "antonio-licata-family-group.jpg" }]
   },
   "Philip M. Licata": {
     photo: "philip-m-licata-tampa.jpg",
